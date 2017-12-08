@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>贪吃蛇面向对象方式</title>
+    <style>
+        .box{
+            width:600px;
+            height:600px;
+            border: 1px solid black;
+            margin: 0 auto;
+            background: url(bj2.jpg) no-repeat;
+            background-size: 100% 100%;
+
+
+        }
+        .box div{
+            width:30px;
+            height:30px;
+            box-sizing: border-box;
+            border: 1px solid black;
+            float: left;
+
+
+        }
+        .she{
+            background: red;
+            border-radius:30%;
+
+        }
+        .food{
+            background:blue;
+            border-radius:20%;
+        }
+
+
+    </style>
+</head>
+<body>
+<div class="box">
+
+</div>
+
+
+</body>
+</html>
+<script>
+    function snake() {
+        this.box=box;
+        this.she=[
+            {x:0,y:0},
+            {x:0,y:1},
+            {x:0,y:2},
+        ];
+        this.food={};
+        this.t=0;
+        this.way='right';
+    }
+    snake.prototype= {
+        play() {
+            this.drawscene();
+            this.drawsnake();
+            this.drawfood();
+            this.move();
+            this.control();
+
+        },
+        drawscene() {
+            let str = '';
+            for (let i = 0; i < 20; i++) {
+                for (let j = 0; j < 20; j++) {
+                    str += `<div id="c${i}-${j}"></div>`;
+                }
+            }
+            box.innerHTML = str;
+        },
+        drawsnake() {
+            this.she.forEach(val => {
+                var obj = document.querySelector(`#c${val.x}-${val.y}`);
+                obj.classList.add('she');
+            })
+        },
+        drawfood() {
+            do {
+                var x = Math.floor(Math.random() * 20);
+                var y = Math.floor(Math.random() * 20);
+            } while (this.check(x, y));
+            let fooddom = document.querySelector(`#c${x}-${y}`);
+            fooddom.classList.add('food');
+            this.food = {x, y}
+        },
+        check(a, b) {
+            return this.she.some(val => val.x == a && val.y == b);
+        },
+        move() {
+            this.t = setInterval(() => {
+                let oh = this.she[this.she.length - 1];
+                let nh;
+                switch (this.way) {
+                    case 'right':
+                        nh = {x: oh.x, y: oh.y + 1};
+                        break;
+                    case 'left':
+                        nh = {x: oh.x, y: oh.y - 1};
+                        break;
+                    case 'top':
+                        nh = {x: oh.x - 1, y: oh.y};
+                        break;
+                    case 'bottom':
+                        nh = {x: oh.x + 1, y: oh.y};
+                        break;
+                }
+
+                let nhdom = document.querySelector(`#c${nh.x}-${nh.y}`);
+                if(!nhdom||this.check(nh.x,nh.y)){
+                    clearInterval(this.t);
+                    alert('game over');
+                    return;
+                }
+                nhdom.className ='she';
+                this.she.push(nh);
+
+                if(nh.x==this.food.x&&nh.y==this.food.y){
+//           获取食物
+                    this.drawfood();
+                }
+                else {
+                    //       去蛇尾
+                    let end = this.she.shift();
+                    let enddom = document.querySelector(`#c${end.x}-${end.y}`);
+                    enddom.classList.remove('she');
+
+                }
+
+            }, 200);
+
+
+        },
+        control() {
+            document.onkeydown = (e) => {
+                switch (e.which) {
+                    case 37:
+//               禁止反方向
+                        if (this.way == 'right') {
+                            return;
+                        }
+                        this.way = 'left';
+                        break;
+                    case 38:
+                        if (this.way == 'bottom') {
+                            return;
+                        }
+                        this.way = 'top';
+                        break;
+                    case 39:
+                        if (this.way == 'left') {
+                            return;
+                        }
+                        this.way = 'right';
+                        break;
+                    case 40:
+                        if (this.way == 'top') {
+                            return;
+                        }
+                        this.way = 'bottom';
+                        break;
+
+                }
+            }
+        }
+    }
+
+
+    var box=document.querySelector('.box');
+    var newgame=new snake();
+    newgame.play();
+</script>
